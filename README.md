@@ -12,13 +12,13 @@ Works with ELF and Mach-O binaries (32-bit and 64-bit).
 
 ## Options
 
-| Option | Description |
-|--------|-------------|
-| `-a` | Display all symbol table entries, including debugger symbols |
-| `-g` | Display only global (external) symbols |
-| `-u` | Display only undefined symbols |
-| `-r` | Sort in reverse order |
-| `-p` | Don't sort; display in symbol-table order |
+| Option | Description                                                  |
+| ------ | ------------------------------------------------------------ |
+| `-a`   | Display all symbol table entries, including debugger symbols |
+| `-g`   | Display only global (external) symbols                       |
+| `-u`   | Display only undefined symbols                               |
+| `-r`   | Sort in reverse order                                        |
+| `-p`   | Don't sort; display in symbol-table order                    |
 
 ## Architecture
 
@@ -79,20 +79,20 @@ Works with ELF and Mach-O binaries (32-bit and 64-bit).
 
 ## Symbol Types
 
-| Type | Description |
-|------|-------------|
-| `A` | Absolute symbol |
-| `B/b` | BSS (uninitialized data) |
-| `C` | Common symbol |
-| `D/d` | Initialized data section |
+| Type  | Description                          |
+| ----- | ------------------------------------ |
+| `A`   | Absolute symbol                      |
+| `B/b` | BSS (uninitialized data)             |
+| `C`   | Common symbol                        |
+| `D/d` | Initialized data section             |
 | `I/i` | Indirect reference to another symbol |
-| `N` | Debug symbol |
-| `R/r` | Read-only data |
-| `S/s` | Small data section |
-| `T/t` | Text (code) section |
-| `U` | Undefined symbol |
-| `W/w` | Weak symbol |
-| `V/v` | Weak object |
+| `N`   | Debug symbol                         |
+| `R/r` | Read-only data                       |
+| `S/s` | Small data section                   |
+| `T/t` | Text (code) section                  |
+| `U`   | Undefined symbol                     |
+| `W/w` | Weak symbol                          |
+| `V/v` | Weak object                          |
 
 *Uppercase = global, lowercase = local*
 
@@ -259,4 +259,4 @@ make re     # Rebuild
 Tests include:
 - All 32 option combinations on ft_nm binary
 - 7 error cases (invalid files, directories, bad options)
-- 16 asset tests (8 object files × 2 option sets)
+- 16 asset tests (8 object files × 1 option)
