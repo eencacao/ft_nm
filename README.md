@@ -120,10 +120,17 @@ static int local_uninit;    // b _local_uninit
 ```
 
 **R/r - Read-only Data**
-Constants and read-only variables. Located in `.rodata` section.
+Constants and read-only variables. Located in `.rodata` section (read-only data).
+- `R` = global read-only symbol
+- `r` = local read-only symbol (static const)
 ```c
-const char *str = "hello";  // R _str
+const int global_const = 100;         // R _global_const
+static const int local_const = 50;    // r _local_const
+const char *str = "hello";            // R _str
+static const char msg[] = "hi";       // r _msg
 ```
+The linker places these in memory pages marked as non-writable.
+Writing to these symbols causes a segmentation fault.
 
 **U - Undefined**
 Symbol is referenced but not defined in this file. Must be resolved at link time.
