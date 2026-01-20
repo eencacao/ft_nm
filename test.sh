@@ -139,6 +139,46 @@ test_error "/tmp/nonexistent_file $BINARY" "nonexistent + valid"
 rm -f /tmp/invalid_file.txt /tmp/empty_file
 rmdir /tmp/test_dir 2>/dev/null
 
+echo ""
+echo "Testing asset object files..."
+echo "=================================="
+
+# Test each asset object file
+ASSETS="text.o data.o bss.o rodata.o undef.o weak.o weak_obj.o common.o"
+
+for asset in $ASSETS; do
+    if [ -f "assets/$asset" ]; then
+        test_options "" "assets/$asset"
+    else
+        echo "⚠ SKIP: assets/$asset not found"
+    fi
+done
+
+# Test with options on assets
+test_asset_options() {
+    local opts="$1"
+    local asset="$2"
+    
+    nm $opts assets/$asset >nm.txt 2>&1
+    $BINARY $opts assets/$asset >ft.txt 2>&1
+    
+    if diff -q nm.txt ft.txt >/dev/null 2>&1; then
+        echo "✓ PASS: $opts assets/$asset"
+        ((PASS++))
+    else
+        echo "✗ FAIL: $opts assets/$asset"
+        diff nm.txt ft.txt | head -3
+        ((FAIL++))
+    fi
+}
+
+# Test -a on each asset (to see all symbols)
+for asset in $ASSETS; do
+    if [ -f "assets/$asset" ]; then
+        test_asset_options "-a" "$asset"
+    fi
+done
+
 # Cleanup
 rm -f nm.txt ft.txt
 

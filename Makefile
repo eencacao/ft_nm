@@ -26,7 +26,7 @@ SRCS		= main.c \
 
 OBJS		= $(addprefix $(OBJDIR)/, $(SRCS:.c=.o))
 
-all: $(NAME)
+all: $(NAME) assets
 
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
@@ -37,12 +37,18 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
+assets:
+	$(MAKE) -C assets
+
 clean:
 	rm -rf $(OBJDIR)
+	$(MAKE) -C assets clean
 
 fclean: clean
 	rm -f $(NAME)
+	$(MAKE) -C assets fclean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re assets
+.NOTPARALLEL:

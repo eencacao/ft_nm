@@ -132,6 +132,22 @@ static const char msg[] = "hi";       // r _msg
 The linker places these in memory pages marked as non-writable.
 Writing to these symbols causes a segmentation fault.
 
+**S/s - Small/Section Data**
+Data in miscellaneous sections that don't fit other categories.
+- `S` = global symbol in small/other section
+- `s` = local symbol in small/other section
+```c
+const int small_const = 42;           // S _small_const (on macOS)
+```
+On macOS/Mach-O, `S` is used for:
+- Constants in `__TEXT` segment (except `__text` section)
+- Data in `__DATA_CONST` segment
+- Common section data
+
+On ELF, `S` typically appears for:
+- Small data sections (`.sdata`, `.sbss`) on some architectures
+- Sections that don't match T/D/B/R categories
+
 **U - Undefined**
 Symbol is referenced but not defined in this file. Must be resolved at link time.
 ```c
@@ -190,33 +206,56 @@ Only shown with `-a` flag. Located in debug sections like `.debug_*`.
 ```
 ft_nm/
 ├── Makefile
+├── README.md
+├── test.sh             # Test suite (55 tests)
 ├── includes/
 │   ├── ft_nm.h         # Main header with structs & prototypes
 │   └── macho.h         # Mach-O format definitions
-└── srcs/
-    ├── main.c          # Entry point, argument handling
-    ├── file_detect.c   # ELF/Mach-O detection
-    ├── elf_parser.c    # ELF file mapping & validation
-    ├── elf32.c         # ELF 32-bit symbol extraction
-    ├── elf32_utils.c   # ELF 32-bit helpers
-    ├── elf64.c         # ELF 64-bit symbol extraction
-    ├── elf64_utils.c   # ELF 64-bit helpers
-    ├── macho32.c       # Mach-O 32-bit symbol extraction
-    ├── macho32_utils.c # Mach-O 32-bit helpers
-    ├── macho64.c       # Mach-O 64-bit symbol extraction
-    ├── macho64_utils.c # Mach-O 64-bit helpers
-    ├── output.c        # Symbol printing
-    ├── sort.c          # Symbol sorting
-    ├── options.c       # Command-line parsing
-    ├── utils.c         # String utilities
-    └── error.c         # Error handling
+├── srcs/
+│   ├── main.c          # Entry point, argument handling
+│   ├── file_detect.c   # ELF/Mach-O detection
+│   ├── elf_parser.c    # ELF file mapping & validation
+│   ├── elf32.c         # ELF 32-bit symbol extraction
+│   ├── elf32_utils.c   # ELF 32-bit helpers
+│   ├── elf64.c         # ELF 64-bit symbol extraction
+│   ├── elf64_utils.c   # ELF 64-bit helpers
+│   ├── macho32.c       # Mach-O 32-bit symbol extraction
+│   ├── macho32_utils.c # Mach-O 32-bit helpers
+│   ├── macho64.c       # Mach-O 64-bit symbol extraction
+│   ├── macho64_utils.c # Mach-O 64-bit helpers
+│   ├── output.c        # Symbol printing
+│   ├── sort.c          # Symbol sorting
+│   ├── options.c       # Command-line parsing
+│   ├── utils.c         # String utilities
+│   └── error.c         # Error handling
+└── assets/             # Test object files
+    ├── Makefile
+    ├── text.c          # T/t symbols (functions)
+    ├── data.c          # D/d symbols (initialized data)
+    ├── bss.c           # B/b symbols (uninitialized data)
+    ├── rodata.c        # R/r, S/s symbols (read-only/const)
+    ├── undef.c         # U symbols (undefined)
+    ├── weak.c          # W/w symbols (weak functions)
+    ├── weak_obj.c      # V/v symbols (weak objects)
+    └── common.c        # C symbols (common)
 ```
 
 ## Build
 
 ```bash
-make        # Build
+make        # Build ft_nm and assets
 make clean  # Remove objects
 make fclean # Remove all
 make re     # Rebuild
 ```
+
+## Testing
+
+```bash
+./test.sh   # Run all 55 tests
+```
+
+Tests include:
+- All 32 option combinations on ft_nm binary
+- 7 error cases (invalid files, directories, bad options)
+- 16 asset tests (8 object files × 2 option sets)
