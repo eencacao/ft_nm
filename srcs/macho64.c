@@ -1,55 +1,21 @@
 #include "ft_nm.h"
 #include "macho.h"
 
-static int	fill_sect_types_macho64(t_file *file, char *sect_types)
-{
-	t_mach_header_64		*hdr;
-	t_load_command			*lc;
-	t_segment_command_64	*seg;
-	t_section_64			*sect;
-	size_t					off;
-	uint32_t				i;
-	uint32_t				j;
-	int						idx;
+int		fill_sect_types_macho64(t_file *file, char *sect_types);
+int		skip_symbol_macho64(t_nlist_64 *sym, int options);
+void	fill_symbol_macho64(t_symbol *dst, t_nlist_64 *src, char *strtab,
+			t_macho_ctx *ctx);
 
-	hdr = (t_mach_header_64 *)file->data;
-	idx = 0;
-	off = sizeof(t_mach_header_64);
-	i = -1;
-	while (++i < hdr->ncmds)
-	{
-		lc = (t_load_command *)((char *)file->data + off);
-		if (lc->cmd == LC_SEGMENT_64)
-		{
-			seg = (t_segment_command_64 *)lc;
-			sect = (t_section_64 *)((char *)seg + sizeof(*seg));
-			j = -1;
-			while (++j < seg->nsects)
-				sect_types[idx++] = get_sect_type_macho(sect[j].segname,
-					sect[j].sectname);
-		}
-		off += lc->cmdsize;
-	}
+static int	init_symtab_macho64(t_nm *nm, t_symtab_command *sc)
+{
+	if (check_offset(&nm->file, sc->symoff, sc->nsyms * sizeof(t_nlist_64)) < 0)
+		return (-1);
+	if (check_offset(&nm->file, sc->stroff, sc->strsize) < 0)
+		return (-1);
+	nm->symbols = malloc(sizeof(t_symbol) * sc->nsyms);
+	if (!nm->symbols)
+		return (-1);
 	return (0);
-}
-
-static int	skip_symbol_macho64(t_nlist_64 *sym, int options)
-{
-	if (sym->n_type & N_STAB)
-		return (!(options & OPT_A));
-	return (0);
-}
-
-static void	fill_symbol_macho64(t_symbol *dst, t_nlist_64 *src, char *strtab,
-	t_macho_ctx *ctx)
-{
-	dst->name = strtab + src->n_strx;
-	dst->value = src->n_value;
-	dst->type = get_symbol_type_macho64(src, ctx->sect_types, ctx->nsects);
-	dst->bind = (src->n_type & N_EXT) ? STB_GLOBAL : STB_LOCAL;
-	dst->sym_type = 0;
-	dst->shndx = src->n_sect;
-	dst->index = ctx->j;
 }
 
 static int	extract_symbols_macho64(t_nm *nm, t_symtab_command *sc,
@@ -59,15 +25,10 @@ static int	extract_symbols_macho64(t_nm *nm, t_symtab_command *sc,
 	char		*strtab;
 	uint32_t	i;
 
-	if (check_offset(&nm->file, sc->symoff, sc->nsyms * sizeof(t_nlist_64)) < 0)
-		return (-1);
-	if (check_offset(&nm->file, sc->stroff, sc->strsize) < 0)
+	if (init_symtab_macho64(nm, sc) < 0)
 		return (-1);
 	syms = (t_nlist_64 *)((char *)nm->file.data + sc->symoff);
 	strtab = (char *)nm->file.data + sc->stroff;
-	nm->symbols = malloc(sizeof(t_symbol) * sc->nsyms);
-	if (!nm->symbols)
-		return (-1);
 	ctx->j = 0;
 	i = -1;
 	while (++i < sc->nsyms)

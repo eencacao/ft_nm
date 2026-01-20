@@ -223,6 +223,7 @@ ft_nm/
 │   ├── macho32_utils.c # Mach-O 32-bit helpers
 │   ├── macho64.c       # Mach-O 64-bit symbol extraction
 │   ├── macho64_utils.c # Mach-O 64-bit helpers
+│   ├── macho64_fill.c  # Mach-O 64-bit section/symbol fill
 │   ├── output.c        # Symbol printing
 │   ├── sort.c          # Symbol sorting
 │   ├── options.c       # Command-line parsing

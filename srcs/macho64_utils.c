@@ -74,29 +74,31 @@ t_symtab_command	*find_symtab_macho64(t_file *file)
 
 int	count_sections_macho64(t_file *file)
 {
-	t_mach_header_64		*hdr;
-	t_load_command			*lc;
-	t_segment_command_64	*seg;
-	size_t					off;
-	uint32_t				i;
-	int						nsects;
+	t_mach_header_64	*hdr;
+	t_load_command		*lc;
+	size_t				off;
+	uint32_t			i;
+	int					nsects;
 
 	hdr = (t_mach_header_64 *)file->data;
 	nsects = 0;
 	off = sizeof(t_mach_header_64);
-	i = 0;
-	while (i < hdr->ncmds)
+	i = -1;
+	while (++i < hdr->ncmds)
 	{
 		if (check_offset(file, off, sizeof(t_load_command)) < 0)
 			return (-1);
 		lc = (t_load_command *)((char *)file->data + off);
 		if (lc->cmd == LC_SEGMENT_64)
-		{
-			seg = (t_segment_command_64 *)lc;
-			nsects += seg->nsects;
-		}
+			nsects += ((t_segment_command_64 *)lc)->nsects;
 		off += lc->cmdsize;
-		i++;
 	}
 	return (nsects);
+}
+
+int	skip_symbol_macho64(t_nlist_64 *sym, int options)
+{
+	if (sym->n_type & N_STAB)
+		return (!(options & OPT_A));
+	return (0);
 }

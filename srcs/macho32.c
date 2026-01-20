@@ -25,6 +25,18 @@ static void	fill_symbol_macho32(t_symbol *dst, t_nlist *src, char *strtab,
 	dst->index = ctx->j;
 }
 
+static int	init_symtab_macho32(t_nm *nm, t_symtab_command *sc)
+{
+	if (check_offset(&nm->file, sc->symoff, sc->nsyms * sizeof(t_nlist)) < 0)
+		return (-1);
+	if (check_offset(&nm->file, sc->stroff, sc->strsize) < 0)
+		return (-1);
+	nm->symbols = malloc(sizeof(t_symbol) * sc->nsyms);
+	if (!nm->symbols)
+		return (-1);
+	return (0);
+}
+
 static int	extract_symbols_macho32(t_nm *nm, t_symtab_command *sc,
 	t_macho_ctx *ctx)
 {
@@ -32,15 +44,10 @@ static int	extract_symbols_macho32(t_nm *nm, t_symtab_command *sc,
 	char		*strtab;
 	uint32_t	i;
 
-	if (check_offset(&nm->file, sc->symoff, sc->nsyms * sizeof(t_nlist)) < 0)
-		return (-1);
-	if (check_offset(&nm->file, sc->stroff, sc->strsize) < 0)
+	if (init_symtab_macho32(nm, sc) < 0)
 		return (-1);
 	syms = (t_nlist *)((char *)nm->file.data + sc->symoff);
 	strtab = (char *)nm->file.data + sc->stroff;
-	nm->symbols = malloc(sizeof(t_symbol) * sc->nsyms);
-	if (!nm->symbols)
-		return (-1);
 	ctx->j = 0;
 	i = -1;
 	while (++i < sc->nsyms)

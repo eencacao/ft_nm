@@ -15,6 +15,7 @@ SRCS		= main.c \
 			  elf64_utils.c \
 			  macho64.c \
 			  macho64_utils.c \
+			  macho64_fill.c \
 			  macho32.c \
 			  macho32_utils.c \
 			  file_detect.c \

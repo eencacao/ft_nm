@@ -78,15 +78,26 @@ char	get_symbol_type_macho32(t_nlist *sym, char *sect_types, int nsects)
 	return (c);
 }
 
+static int	fill_segment_types_32(t_segment_command *seg, char *sect_types,
+	int idx)
+{
+	t_section	*sect;
+	uint32_t	j;
+
+	sect = (t_section *)((char *)seg + sizeof(*seg));
+	j = -1;
+	while (++j < seg->nsects)
+		sect_types[idx++] = get_sect_type_macho(sect[j].segname,
+			sect[j].sectname);
+	return (idx);
+}
+
 int	fill_sect_types_macho32(t_file *file, char *sect_types)
 {
 	t_mach_header		*hdr;
 	t_load_command		*lc;
-	t_segment_command	*seg;
-	t_section			*sect;
 	size_t				off;
 	uint32_t			i;
-	uint32_t			j;
 	int					idx;
 
 	hdr = (t_mach_header *)file->data;
@@ -97,14 +108,8 @@ int	fill_sect_types_macho32(t_file *file, char *sect_types)
 	{
 		lc = (t_load_command *)((char *)file->data + off);
 		if (lc->cmd == LC_SEGMENT)
-		{
-			seg = (t_segment_command *)lc;
-			sect = (t_section *)((char *)seg + sizeof(*seg));
-			j = -1;
-			while (++j < seg->nsects)
-				sect_types[idx++] = get_sect_type_macho(sect[j].segname,
-					sect[j].sectname);
-		}
+			idx = fill_segment_types_32((t_segment_command *)lc,
+				sect_types, idx);
 		off += lc->cmdsize;
 	}
 	return (0);
