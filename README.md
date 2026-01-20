@@ -85,13 +85,98 @@ Works with ELF and Mach-O binaries (32-bit and 64-bit).
 | `B/b` | BSS (uninitialized data) |
 | `C` | Common symbol |
 | `D/d` | Initialized data section |
+| `I/i` | Indirect reference to another symbol |
+| `N` | Debug symbol |
+| `R/r` | Read-only data |
+| `S/s` | Small data section |
 | `T/t` | Text (code) section |
 | `U` | Undefined symbol |
-| `S/s` | Small data section |
-| `R/r` | Read-only data |
 | `W/w` | Weak symbol |
+| `V/v` | Weak object |
 
 *Uppercase = global, lowercase = local*
+
+### Symbol Type Details
+
+**T/t - Text (Code)**
+Functions and executable code. Located in the `.text` section.
+```c
+void my_function(void) { }  // T _my_function
+static void helper(void) { } // t _helper
+```
+
+**D/d - Data (Initialized)**
+Global variables with initial values. Located in the `.data` section.
+```c
+int global_var = 42;        // D _global_var
+static int local_var = 10;  // d _local_var
+```
+
+**B/b - BSS (Uninitialized)**
+Global variables without initial values (zero-initialized). Located in `.bss` section.
+```c
+int uninitialized;          // B _uninitialized
+static int local_uninit;    // b _local_uninit
+```
+
+**R/r - Read-only Data**
+Constants and read-only variables. Located in `.rodata` section.
+```c
+const char *str = "hello";  // R _str
+```
+
+**U - Undefined**
+Symbol is referenced but not defined in this file. Must be resolved at link time.
+```c
+extern void external_func(void); // U _external_func
+printf("hello");                 // U _printf
+```
+
+**A - Absolute**
+Symbol has a fixed address that won't change during linking.
+
+**C - Common**
+Uninitialized global variable (legacy behavior, similar to BSS).
+```c
+int common_var;  // C _common_var (without extern, in some compilers)
+```
+
+**W/w - Weak Symbol**
+Can be overridden by a strong symbol of the same name at link time.
+- `W` = weak defined symbol (typically functions)
+- `w` = weak undefined symbol (resolved to NULL/0 if not found at link time)
+```c
+__attribute__((weak)) void optional_hook(void) { }  // W _optional_hook
+extern void __attribute__((weak)) maybe_exists(void); // w if unresolved
+```
+Use cases:
+- Default implementations that can be overridden
+- Optional library features
+- Plugin systems
+
+**V/v - Weak Object**
+Weak symbol that is specifically a data object (variable), not a function.
+- `V` = weak global object
+- `v` = weak local object (rare)
+```c
+__attribute__((weak)) int optional_config = 42;  // V _optional_config
+```
+*Note: V/v is ELF-specific. Mach-O uses W/w for all weak symbols.*
+
+**I/i - Indirect Symbol**
+Reference that resolves to another symbol (GNU extension, also in Mach-O).
+Used for symbol aliasing and resolver functions.
+- `I` = global indirect (externally visible)
+- `i` = local indirect (file-scoped, static)
+```c
+// GNU indirect function - resolved at runtime
+__attribute__((ifunc("resolver"))) void my_func(void);        // I
+static __attribute__((ifunc("res"))) void local_func(void);   // i
+```
+
+**N - Debug Symbol**
+Symbol used for debugging only (not allocated in memory).
+Only shown with `-a` flag. Located in debug sections like `.debug_*`.
 
 ## File Structure
 

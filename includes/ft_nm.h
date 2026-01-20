@@ -73,6 +73,7 @@
 # define STT_FUNC    2
 # define STT_SECTION 3
 # define STT_FILE    4
+# define STT_GNU_IFUNC 10
 
 # define ELF32_ST_BIND(i)   ((i) >> 4)
 # define ELF32_ST_TYPE(i)   ((i) & 0xf)

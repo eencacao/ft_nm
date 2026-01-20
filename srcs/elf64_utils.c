@@ -47,6 +47,12 @@ char	get_symbol_type_64(Elf64_Sym *sym, Elf64_Shdr *shdr)
 
 	if (sym->st_shndx == SHN_UNDEF)
 		return ('U');
+	if (ELF64_ST_TYPE(sym->st_info) == STT_GNU_IFUNC)
+	{
+		if (ELF64_ST_BIND(sym->st_info) == STB_LOCAL)
+			return ('i');
+		return ('I');
+	}
 	if (sym->st_shndx == SHN_ABS)
 		c = 'A';
 	else if (sym->st_shndx == SHN_COMMON)
