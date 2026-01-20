@@ -256,7 +256,9 @@ make re     # Rebuild
 ./test.sh   # Run all 55 tests
 ```
 
+The test script compares `ft_nm` output against the system `nm` command.
+
 Tests include:
-- All 32 option combinations on ft_nm binary
-- 7 error cases (invalid files, directories, bad options)
-- 16 asset tests (8 object files × 1 option)
+- **32 option combinations** on ft_nm binary (no options, single, pairs, triples, quads, all five)
+- **7 error cases**: nonexistent file, directory, empty file, invalid format, invalid option, mixed valid/invalid files
+- **16 asset tests**: 8 object files × 2 (no options + `-a` flag)
