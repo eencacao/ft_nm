@@ -1,0 +1,14 @@
+ft_nm
+*.txt
+objs/
+*.o
+*.out
+*.exe
+*.log
+*.dSYM/
+*.swp
+.DS_Store
+.vscode/
+.idea/
+*.iml
+.history/
